@@ -1,0 +1,176 @@
+public class Drug {
+    private int id;
+    private String name;
+    private double price;
+    private int category;
+    private int quantity;
+
+    public Drug(int id, String name, double price, int category, int quantity) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.category = category;
+        this.quantity = quantity;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+}
+import java.util.ArrayList;
+import java.util.List;
+
+public class Pharmacy {
+    private int capacity;
+    private List<Drug> drugs;
+    private double totalSales;
+
+    public Pharmacy(int capacity) {
+        this.capacity = capacity;
+        this.drugs = new ArrayList<>();
+        this.totalSales = 0;
+    }
+
+    public boolean addDrug(Drug drug) {
+        if (drugs.size() < capacity) {
+            drugs.add(drug);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeDrug(int id) {
+        for (Drug drug : drugs) {
+            if (drug.getId() == id) {
+                drugs.remove(drug);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Drug findDrugById(int id) {
+        for (Drug drug : drugs) {
+            if (drug.getId() == id) {
+                return drug;
+            }
+        }
+        return null;
+    }
+
+    public double placeOrder(int id, int quantity) {
+        Drug drug = findDrugById(id);
+        if (drug != null && drug.getQuantity() >= quantity) {
+            drug.setQuantity(drug.getQuantity() - quantity);
+            double price = drug.getPrice() * quantity;
+            if (drug.getCategory() == 1) {
+                price *= 1.2;
+            }
+            totalSales += price;
+            return price;
+        }
+        return -1;
+    }
+
+    public double getTotalSales() {
+        return totalSales;
+    }
+}
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the capacity of the pharmacy: ");
+        int capacity = scanner.nextInt();
+        Pharmacy pharmacy = new Pharmacy(capacity);
+
+        while (true) {
+            System.out.println("\n1. Add drug");
+            System.out.println("2. Remove drug");
+            System.out.println("3. Place an order");
+            System.out.println("4. Get the total sales for one day");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    // Add drug
+                    System.out.print("Enter drug ID: ");
+                    int id = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    System.out.print("Enter drug name: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Enter drug price: ");
+                    double price = scanner.nextDouble();
+                    System.out.print("Enter drug category (1-Cosmetics, 2-Prescription, 3-Other): ");
+                    int category = scanner.nextInt();
+                    System.out.print("Enter available quantity: ");
+                    int quantity = scanner.nextInt();
+
+                    Drug drug = new Drug(id, name, price, category, quantity);
+                    if (pharmacy.addDrug(drug)) {
+                        System.out.println("Drug added successfully.");
+                    } else {
+                        System.out.println("Pharmacy is at capacity. Cannot add drug.");
+                    }
+                    break;
+                case 2:
+                    // Remove drug
+                    System.out.print("Enter drug ID to remove: ");
+                    int removeId = scanner.nextInt();
+                    if (pharmacy.removeDrug(removeId)) {
+                        System.out.println("Drug removed successfully.");
+                    } else {
+                        System.out.println("Drug not found.");
+                    }
+                    break;
+                case 3:
+                    // Place an order
+                    System.out.print("Enter drug ID to order: ");
+                    int orderId = scanner.nextInt();
+                    System.out.print("Enter quantity to order: ");
+                    int orderQuantity = scanner.nextInt();
+
+                    double orderPrice = pharmacy.placeOrder(orderId, orderQuantity);
+                    if (orderPrice >= 0) {
+                        System.out.printf("Order placed successfully. Total price: %.2f\n", orderPrice);
+                    } else {
+                        System.out.println("Order could not be placed. Drug not available or insufficient quantity.");
+                    }
+                    break;
+                case 4:
+                    // Get the total sales for one day
+                    System.out.printf("Total sales for the day: %.2f\n", pharmacy.getTotalSales());
+                    break;
+                case 5:
+                    // Exit
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+}
